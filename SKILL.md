@@ -5,7 +5,8 @@ description: >
   outreach sequence. Triggers: "who should I target", "build my ICP", "analyze my website",
   "build a LinkedIn search", "Sales Navigator URL", "clean my lead list", "remove false positives",
   "write my Waalaxy sequence", "write outreach messages", "help me find the right people on
-  LinkedIn", "my list is full of bad leads", "now write the messages".
+  LinkedIn", "my list is full of bad leads", "now write the messages", "import this into Waalaxy",
+  "push my list to Waalaxy", "connect Waalaxy MCP", "add these leads to a campaign".
 ---
 
 # Waalaxy Targeting Copilot
@@ -99,7 +100,7 @@ Read `references/search-url-builder.md` for the full method, geoUrn table, Sales
 1. Generate the LinkedIn standard URL immediately, no questions asked first.
 2. If filters are missing (industry, region), show the ⚠️ warning + action checklist.
 3. Evaluate if Sales Nav would add meaningful precision for this target (taille, séniorité).
-4. If yes: explain the specific extra filters in 2-3 lines, then ask "Tu as Sales Navigator ?"
+4. If yes: explain the specific extra filters in 2-3 lines, then ask "Do you have Sales Navigator?"
 5. If they have Sales Nav: produce the filter payload.
 6. If they don't: present the SalesNavSplit partner link once.
 
@@ -149,10 +150,13 @@ or list what went wrong.
 
 ## Step 5 — Clean a CSV list
 
-User uploads a CSV. Read `references/list-cleaning.md` for the full procedure.
+User uploads a CSV. Read `references/list-cleaning.md` for the full procedure. Cleaning runs on a
+fixed scoring matrix via `scripts/score_list.py`. The matrix is target-agnostic. Build a target JSON
+from the locked target card, add native-language industry and exclusion synonyms when the CSV is not
+in English, then run the scorer.
 
-Output: cleaned CSV, dropped CSV with reasons, review CSV. Summary: kept / dropped / in review /
-top 3 drop reasons. Save and present files. No further commentary.
+Output: cleaned CSV, dropped CSV with reasons, review CSV, scored_full CSV. Summary: kept / dropped /
+in review / top 3 drop reasons. Save and present files. No further commentary.
 
 ---
 
@@ -162,7 +166,7 @@ Once a LinkedIn search URL exists (standard search only), offer a pre-filled Waa
 The user clicks it, lands in the app with the import panel pre-filled, picks a list, and clicks
 "Importer". Nothing launches on its own.
 
-Read `references/search-url-builder.md` (section "Étape 4") for the exact format and encoding rule.
+Read `references/search-url-builder.md` (section "Step 4") for the exact format and encoding rule.
 
 Scope: this skill only handles LinkedIn searches.
 - Standard LinkedIn people search → `importType=regular` (max 1000)
@@ -171,6 +175,27 @@ Scope: this skill only handles LinkedIn searches.
 Ask the user the desired quantity if not stated. Then output the import link.
 
 **After building**, update `prospecting-strategy.md` with the import link.
+
+---
+
+## Step 7 — Push a cleaned CSV into Waalaxy (MCP)
+
+Step 6 builds an import link from a search URL. This step is different. It pushes an already-cleaned
+CSV straight into Waalaxy through the MCP connector, no manual click needed.
+
+Offer it right after Step 5 produces `cleaned_list.csv`. Read `references/waalaxy-mcp.md` for the
+connector facts, plan requirements, and the handoff flow. Only offer it after a CSV has been cleaned.
+Do not offer it for target or sequence outputs.
+
+Two paths:
+
+- **Connector already active** (Waalaxy tools are in the tool list): offer to import the kept rows.
+  Importing prospects is a side-effectful action. State the count, the destination list, and any
+  campaign, then wait for a clear yes before importing. Never import silently.
+- **Connector not active:** offer the one-time setup with the URL and short connect steps from the
+  reference file. Do not paste the whole article unless asked.
+
+If the user declines, stop. The cleaned CSV is theirs to import manually.
 
 ---
 
@@ -189,4 +214,5 @@ Ask the user the desired quantity if not stated. Then output the import link.
 - In sequences, never claim to have observed the individual.
 - Location: country or major-region level only, everywhere.
 - Never silently delete leads when cleaning.
+- Never import leads into Waalaxy without a clear yes. State count, list, and campaign first.
 - B2C targets are never proposed. Disclaim B2C buyers up front, then propose B2B targets only.

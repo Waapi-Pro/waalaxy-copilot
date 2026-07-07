@@ -4,221 +4,221 @@ Turn a locked target into a LinkedIn search, then import into Waalaxy.
 
 ---
 
-## Flow par défaut
+## Default flow
 
-1. Toujours générer l'URL LinkedIn standard en premier.
-2. Expliquer en 2-3 lignes pourquoi Sales Nav apporterait des filtres supplémentaires utiles pour ce target précis (seulement si c'est vrai).
-3. Demander si l'utilisateur a Sales Nav.
-4. Selon la réponse: produire le payload Sales Nav, ou présenter le partenaire.
+1. Always generate the standard LinkedIn URL first.
+2. Explain in 2-3 lines why Sales Nav would add useful extra filters for this specific target (only if true).
+3. Ask whether the user has Sales Nav.
+4. Depending on the answer: produce the Sales Nav payload, or present the partner.
 
 ---
 
-## Étape 1 — URL LinkedIn standard (toujours)
+## Step 1 — Standard LinkedIn URL (always)
 
 Base: `https://www.linkedin.com/search/results/people/`
 
-Paramètres:
-- `keywords` — titres en Boolean: `("Gérant" OR "Directeur Général") NOT stagiaire`
-- `geoUrn` — geo ID pays, encodé comme `%5B%22105015875%22%5D`
-- `origin` — toujours `FACETED_SEARCH`
+Parameters:
+- `keywords` — titles in Boolean: `("Gérant" OR "Directeur Général") NOT stagiaire`
+- `geoUrn` — country geo ID, encoded as `%5B%22105015875%22%5D`
+- `origin` — always `FACETED_SEARCH`
 
-### Table geoUrn pays (Captain Data)
+### Country geoUrn table (Captain Data)
 
-| Pays | geoUrn |
+| Country | geoUrn |
 |---|---|
 | France | 105015875 |
-| Belgique | 100565514 |
-| Espagne | 105646813 |
-| Angleterre | 102299470 |
-| Allemagne | 101282230 |
-| Italie | 103350119 |
-| États-Unis | 103644278 |
+| Belgium | 100565514 |
+| Spain | 105646813 |
+| England | 102299470 |
+| Germany | 101282230 |
+| Italy | 103350119 |
+| United States | 103644278 |
 | Canada | 101174742 |
-| Australie | 101452733 |
-| Inde | 102713980 |
-| Chine | 102890883 |
-| Japon | 101355337 |
-| Brésil | 106057199 |
-| Mexique | 103323778 |
-| Pays-Bas | 102890719 |
-| Singapour | 102454443 |
-| Suisse | 106693272 |
-| Suède | 105117694 |
-| Corée du Sud | 105149562 |
-| Russie | 101728296 |
-| Émirats arabes unis | 104305776 |
+| Australia | 101452733 |
+| India | 102713980 |
+| China | 102890883 |
+| Japan | 101355337 |
+| Brazil | 106057199 |
+| Mexico | 103323778 |
+| Netherlands | 102890719 |
+| Singapore | 102454443 |
+| Switzerland | 106693272 |
+| Sweden | 105117694 |
+| South Korea | 105149562 |
+| Russia | 101728296 |
+| United Arab Emirates | 104305776 |
 
-Pour combiner plusieurs pays: `geoUrn=%5B%22105015875%22%2C%22100565514%22%5D`
+To combine several countries: `geoUrn=%5B%22105015875%22%2C%22100565514%22%5D`
 
-Régions et industries: IDs non publics, passer par l'UI LinkedIn.
+Regions and industries: IDs are not public, go through the LinkedIn UI.
 
 ### Construction
 
-1. Titres dans `keywords` en Boolean, URL-encodés.
-2. geoUrn pays depuis la table si le target est au niveau pays.
-3. Pour industrie et région: URL partielle + warning + checklist d'actions.
+1. Titles in `keywords` in Boolean, URL-encoded.
+2. Country geoUrn from the table if the target is at country level.
+3. For industry and region: partial URL + warning + action checklist.
 
-### Format de sortie
+### Output format
 
 **URL:**
 ```
 [url]
 ```
 
-Si des filtres manquent (industrie, région):
+If filters are missing (industry, region):
 
-> ⚠️ Cette URL est incomplète. Sans les étapes ci-dessous, tu obtiendras des résultats hors cible.
+> ⚠️ This URL is incomplete. Without the steps below, you will get off-target results.
 
-- [ ] Ouvre l'URL dans LinkedIn
-- [ ] Clique **Secteur d'activité** → sélectionne [valeur exacte]
-- [ ] Clique **Localisations** → sélectionne [valeur exacte] *(si région)*
-- [ ] Copie l'URL finale depuis la barre d'adresse
-- [ ] Importe-la dans Waalaxy via l'import LinkedIn
-
----
-
-## Étape 2 — Transition vers Sales Nav (contextuelle)
-
-Après l'URL standard, évalue si Sales Nav apporterait une précision significative pour ce target.
-
-**Mentionner Sales Nav seulement quand au moins un de ces cas s'applique:**
-- La taille d'entreprise est un critère clé du target (ex: BET 1-50, SaaS 51-200)
-- La séniorité doit être filtrée précisément (ex: exclure les juniors sur un target de décideurs)
-- Le target est large et génèrerait plus de 2 500 résultats sur LinkedIn standard
-
-**Si Sales Nav est pertinent**, expliquer en 2-3 lignes max les filtres supplémentaires utiles pour ce target précis. Pas de liste générique. Exemple:
-
-> "Avec Sales Navigator, tu pourrais filtrer directement sur la taille d'entreprise (1-50 salariés) et la séniorité (Owner, Director), ce qui évite d'importer des gérants de grands groupes ou des assistants. Sur ce target, ça réduirait le bruit de façon significative."
-
-Puis demander: **"Tu as accès à Sales Navigator ?"**
+- [ ] Open the URL in LinkedIn
+- [ ] Click **Industry** → select [exact value]
+- [ ] Click **Locations** → select [exact value] *(if region)*
+- [ ] Copy the final URL from the address bar
+- [ ] Import it into Waalaxy via the LinkedIn import
 
 ---
 
-## Étape 3 — Selon la réponse
+## Step 2 — Transition to Sales Nav (contextual)
 
-### L'utilisateur a Sales Nav → produire le payload
+After the standard URL, judge whether Sales Nav would add meaningful precision for this target.
 
-Ne pas construire une URL Sales Nav à la main. Produire un payload de filtres structuré que l'utilisateur applique dans l'UI.
+**Mention Sales Nav only when at least one of these applies:**
+- Company size is a key target criterion (e.g. engineering firms 1-50, SaaS 51-200)
+- Seniority must be filtered precisely (e.g. exclude juniors on a decision-maker target)
+- The target is broad and would generate more than 2,500 results on standard LinkedIn
 
-**Méthode de génération du payload:**
+**If Sales Nav is relevant**, explain in 2-3 lines max the extra filters useful for this specific target. No generic list. Example:
 
-En tant que stratège B2B, traduire le target en filtres Sales Navigator. Utiliser uniquement les filtres justifiés par le target. Qualité > quantité.
+> "With Sales Navigator, you could filter directly on company size (1-50 employees) and seniority (Owner, Director), which avoids importing managers from large groups or assistants. On this target, that would cut the noise significantly."
 
-FILTRES CORE (toujours renseigner si le champ ICP correspondant est présent):
-- `current_title.include` — 4 à 6 titres LinkedIn réels
-- `current_title.exclude` — 2 à 4 titres adjacents-mais-faux
-- `seniority_level` — valeurs strictes: Owner, Partner, CXO, VP, Director, Manager, Senior, Entry, In Training
-- `geography` — pays ou grande région reconnue par Sales Nav; jamais ville ou département
-- `industry` — tags industrie LinkedIn verbatim
-- `company_headcount` — bandes strictes: Self-employed, 1-10, 11-50, 51-200, 201-500, 501-1000, 1001-5000, 5001-10000, 10001+
+Then ask: **"Do you have access to Sales Navigator?"**
 
-FILTRES EXPLORATOIRES (ajouter seulement si le target le justifie):
-- `function` — valeurs strictes: Accounting, Administrative, Arts and Design, Business Development, Community and Social Services, Consulting, Education, Engineering, Entrepreneurship, Finance, Healthcare Services, Human Resources, Information Technology, Legal, Marketing, Media and Communications, Military and Protective Services, Operations, Product Management, Program and Project Management, Purchasing, Quality Assurance, Real Estate, Research, Sales, Support
-- `years_in_current_position` — 0-25; utile si la douleur implique une ancienneté dans le poste
-- `company_type` — valeurs strictes: Public Company, Privately Held, Nonprofit, Educational Institution, Partnership, Self-Employed, Self-Owned, Government Agency
+---
+
+## Step 3 — Depending on the answer
+
+### The user has Sales Nav → produce the payload
+
+Do not build a Sales Nav URL by hand. Produce a structured filter payload the user applies in the UI.
+
+**Payload generation method:**
+
+As a B2B strategist, translate the target into Sales Navigator filters. Use only the filters the target justifies. Quality > quantity.
+
+CORE FILTERS (always fill when the matching ICP field is present):
+- `current_title.include` — 4 to 6 real LinkedIn titles
+- `current_title.exclude` — 2 to 4 adjacent-but-wrong titles
+- `seniority_level` — strict values: Owner, Partner, CXO, VP, Director, Manager, Senior, Entry, In Training
+- `geography` — country or major region recognized by Sales Nav; never city or department
+- `industry` — LinkedIn industry tags verbatim
+- `company_headcount` — strict bands: Self-employed, 1-10, 11-50, 51-200, 201-500, 501-1000, 1001-5000, 5001-10000, 10001+
+
+EXPLORATORY FILTERS (add only if the target justifies it):
+- `function` — strict values: Accounting, Administrative, Arts and Design, Business Development, Community and Social Services, Consulting, Education, Engineering, Entrepreneurship, Finance, Healthcare Services, Human Resources, Information Technology, Legal, Marketing, Media and Communications, Military and Protective Services, Operations, Product Management, Program and Project Management, Purchasing, Quality Assurance, Real Estate, Research, Sales, Support
+- `years_in_current_position` — 0-25; useful if the pain implies tenure in the role
+- `company_type` — strict values: Public Company, Privately Held, Nonprofit, Educational Institution, Partnership, Self-Employed, Self-Owned, Government Agency
 - `profile_language` — "French", "English", etc.
 
-Règles:
-- Titres: strings LinkedIn réels, jamais des familles de postes
-- "Head of X" → séniorité Director (Sales Nav n'a pas d'enum "Head")
-- Chaque filtre exploratoire doit être justifiable par le target
-- Les exclusions ne s'ajoutent que si le target les justifie explicitement
+Rules:
+- Titles: real LinkedIn strings, never job families
+- "Head of X" → seniority Director (Sales Nav has no "Head" enum)
+- Every exploratory filter must be justifiable by the target
+- Exclusions are added only if the target explicitly justifies them
 
-**Format de sortie payload:**
+**Payload output format:**
 
-Titres inclus: [liste]
-Titres exclus: [liste]
-Séniorité: [liste]
-Localisation: [liste]
-Secteur: [liste]
-Taille d'entreprise: [liste]
-Fonction: [valeur] *(si justifiée)*
-Ancienneté dans le poste: [X-Y ans] *(si justifiée)*
-Type d'entreprise: [valeur] *(si justifiée)*
+Included titles: [list]
+Excluded titles: [list]
+Seniority: [list]
+Location: [list]
+Industry: [list]
+Company size: [list]
+Function: [value] *(if justified)*
+Tenure in role: [X-Y years] *(if justified)*
+Company type: [value] *(if justified)*
 
 **Actions:**
-- [ ] Ouvre Sales Navigator → People search
-- [ ] Applique chaque filtre ci-dessus
-- [ ] Vérifie le nombre de résultats: vise 1 000 à 1 500
-- [ ] Si trop large: resserre sur taille d'entreprise ou séniorité
-- [ ] Si trop étroit: élargis les titres ou ajoute un secteur adjacent
-- [ ] Sauvegarde la search dans Sales Nav (auto-sync Waalaxy toutes les 12h)
-- [ ] Importe dans Waalaxy via l'import Sales Navigator
+- [ ] Open Sales Navigator → People search
+- [ ] Apply each filter above
+- [ ] Check the result count: aim for 1,000 to 1,500
+- [ ] If too broad: tighten on company size or seniority
+- [ ] If too narrow: widen the titles or add an adjacent industry
+- [ ] Save the search in Sales Nav (Waalaxy auto-syncs every 12h)
+- [ ] Import into Waalaxy via the Sales Navigator import
 
 ---
 
-### L'utilisateur n'a pas Sales Nav → présenter le partenaire
+### The user does not have Sales Nav → present the partner
 
-> "Sales Navigator coûte environ 100€/mois en direct. Waalaxy a un partenariat avec **SalesNavSplit** qui permet d'y accéder à -60% en partageant une licence avec d'autres utilisateurs. C'est la solution la plus utilisée par les clients Waalaxy qui veulent Sales Nav sans le prix plein.
+> "Sales Navigator costs around 100€/month direct. Waalaxy has a partnership with **SalesNavSplit** that gives access at -60% by sharing a license with other users. It is the option most used by Waalaxy customers who want Sales Nav without the full price.
 >
 > 👉 [salesnavsplit.com/waalaxy-partnership](https://salesnavsplit.com/waalaxy-partnership)"
 
-Ne pas insister. Proposer une fois, passer à la suite.
+Do not push. Offer once, move on.
 
 ---
 
-## Après avoir livré l'URL ou le payload
+## After delivering the URL or payload
 
-Une ligne: volume estimé et filtre qui fait le gros du travail.
-Une ligne: rappel 1 000-1 500 profils max pour une campagne Waalaxy efficace.
-Mettre à jour `prospecting-strategy.md` avec la section recherche LinkedIn.
+One line: estimated volume and the filter doing the heavy lifting.
+One line: reminder of 1,000-1,500 profiles max for an effective Waalaxy campaign.
+Update `prospecting-strategy.md` with the LinkedIn search section.
 
 ---
 
-## Étape 4 — Lien d'import Waalaxy (pré-rempli)
+## Step 4 — Waalaxy import link (pre-filled)
 
-Une fois l'URL LinkedIn finale prête, on génère un lien qui ouvre l'app Waalaxy avec le panel
-d'import déjà rempli. L'utilisateur choisit sa liste et clique « Importer ». Rien ne se lance seul.
+Once the final LinkedIn URL is ready, generate a link that opens the Waalaxy app with the import panel
+already filled. The user picks their list and clicks "Import". Nothing launches on its own.
 
-Périmètre de cette skill: recherches LinkedIn uniquement.
-- Recherche LinkedIn classique → `importType=regular` (max 1000)
-- Recherche Sales Navigator → `importType=salesnav` (max 2500)
+Scope of this skill: LinkedIn searches only.
+- Standard LinkedIn search → `importType=regular` (max 1000)
+- Sales Navigator search → `importType=salesnav` (max 2500)
 
 ### Format
 
 Base: `https://app.waalaxy.com/?`
 
-Trois query params:
-- `importType` (obligatoire) — `regular` ou `salesnav`
-- `importUrl` (obligatoire) — l'URL LinkedIn, **URL-encodée** (voir ci-dessous)
-- `quantity` (optionnel) — nombre de prospects. Si > max, ramené au max automatiquement.
+Three query params:
+- `importType` (required) — `regular` or `salesnav`
+- `importUrl` (required) — the LinkedIn URL, **URL-encoded** (see below)
+- `quantity` (optional) — number of prospects. If > max, capped to max automatically.
 
-### Règle critique: encoder importUrl
+### Critical rule: encode importUrl
 
-L'URL LinkedIn contient `: / ? & =` qui cassent le lien si collés tels quels. Il faut
-URL-encoder l'URL LinkedIn entière avant de la placer dans `importUrl`:
+The LinkedIn URL contains `: / ? & =` which break the link if pasted as-is. URL-encode the entire
+LinkedIn URL before placing it in `importUrl`:
 
-| Caractère | Encodé |
+| Character | Encoded |
 |---|---|
 | `:` | `%3A` |
 | `/` | `%2F` |
 | `?` | `%3F` |
 | `&` | `%26` |
 | `=` | `%3D` |
-| espace | `%20` |
+| space | `%20` |
 
-Équivalent de `encodeURIComponent(url)` en JS. Encoder l'URL LinkedIn en entier, params compris.
+Equivalent to `encodeURIComponent(url)` in JS. Encode the whole LinkedIn URL, params included.
 
-### Exemple
+### Example
 
-URL LinkedIn:
+LinkedIn URL:
 ```
 https://www.linkedin.com/search/results/people/?keywords=ceo
 ```
 
-Lien d'import (importer 500 profils):
+Import link (import 500 profiles):
 ```
 https://app.waalaxy.com/?importType=regular&importUrl=https%3A%2F%2Fwww.linkedin.com%2Fsearch%2Fresults%2Fpeople%2F%3Fkeywords%3Dceo&quantity=500
 ```
 
-### Format de sortie
+### Output format
 
-**Lien d'import Waalaxy:**
+**Waalaxy import link:**
 ```
-[lien complet]
+[full link]
 ```
 
-Une ligne: ce lien pré-remplit l'import (type + URL + quantité). L'utilisateur garde la main sur
-le choix de liste et clique « Importer ».
+One line: this link pre-fills the import (type + URL + quantity). The user keeps control over the
+list choice and clicks "Import".
 
-Mettre à jour `prospecting-strategy.md` avec le lien d'import.
+Update `prospecting-strategy.md` with the import link.
