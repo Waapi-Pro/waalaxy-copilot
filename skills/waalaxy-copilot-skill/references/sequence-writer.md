@@ -1,6 +1,6 @@
 # Sequence writer
 
-Reference for Step 5 of the targeting copilot: write a reply-optimised 3-message cold LinkedIn
+Reference for Step 4 of the targeting copilot: write a reply-optimised 3-message cold LinkedIn
 sequence (opener, follow-up, break-up) for a locked target.
 
 When you reach this step inside the copilot, you already have the website read (Step 1) and the
@@ -118,6 +118,23 @@ Never use these or close variants, in any language (translations count):
 - "does that resonate"
 
 When one of these would have fit, say the actual thing instead: name the concrete action ("I can send you the kit", "tu peux le tester sur ta prochaine campagne") or ask the question directly ("Can I show you in 15 minutes?").
+
+### Banned recurring openers (follow-up)
+
+Do NOT open the follow-up with a stock "no reply, I understand" acknowledgement. These are dead giveaways of an automated sequence and recur across campaigns. Banned openers and their close variants in any language:
+- "Pas de retour, je me doute" / "Pas de réponse, je comprends" / "Pas de retour, c'est normal"
+- "No reply, I get it" / "I know you're busy" / "I imagine you're swamped"
+- Any follow-up first sentence whose only job is to excuse the silence.
+
+Instead, open the follow-up on the NEW angle directly. The lead does not need their silence narrated back to them. Jump to the fresh value or the sharper question.
+
+### No reuse of example phrasing
+
+The worked examples below teach STRUCTURE (the moves: filmable scene, scope break-up, persona-as-hypothesis), never WORDING. Never lift a sentence, phrase, or sentence shape from an example. In particular, the break-up must not copy "Je me trompe peut-être de personne / d'interlocuteur" + "c'est vous qui gérez X, ou quelqu'un d'autre". That exact construction is now overused. Write a fresh routing question each time, or use a different exit ramp entirely (a clean goodbye, a resource drop, a single yes/no).
+
+### Inter-message coherence check
+
+Before delivering, read the three messages as one story and verify they do not contradict each other. A frequent failure: the opener says the client has already left ("le client est déjà parti") while the follow-up assumes they are still on site ("avant que tu remballes"). Fix any timeline, location, or state contradiction so the three messages describe one consistent situation.
 
 ---
 

@@ -1,7 +1,9 @@
 # Waalaxy Copilot
 
-A Claude plugin: the **Waalaxy Targeting Copilot** skill plus the **Waalaxy MCP connector**, bundled
-so one install sets up both.
+A Claude plugin: the **Waalaxy AI Copilot** skill plus the **Waalaxy MCP connector**, bundled
+so one install sets up both. Five capabilities — website positioning teardown, scored targets,
+LinkedIn/Sales Nav search URLs, LinkedIn profile optimization, and outreach sequences (plus CSV
+list cleaning).
 
 ```
 /plugin marketplace add Waapi-Pro/waalaxy-copilot-skill
@@ -15,9 +17,10 @@ being set up by hand.
 ## What's in here
 
 - [`skills/waalaxy-copilot-skill/`](./skills/waalaxy-copilot-skill) — the skill itself: `SKILL.md`
-  orchestrates the flow (website → scored targets → LinkedIn/Sales Nav search URL → 3-message
-  sequence → CSV list cleaning → Waalaxy import), `references/` holds the detailed method for each
-  step, `scripts/score_list.py` is the deterministic scoring matrix used for list cleaning.
+  orchestrates the flow (website positioning teardown → scored targets → LinkedIn/Sales Nav search
+  URL → LinkedIn profile optimization → 3-message sequence → CSV list cleaning → Waalaxy import),
+  `references/` holds the detailed method for each step, `scripts/score_list.py` is the deterministic
+  scoring matrix used for list cleaning.
 - [`.mcp.json`](./.mcp.json) + [`.claude-plugin/`](./.claude-plugin) — the plugin manifest and the
   bundled Waalaxy MCP server config (SSE, OAuth). This is what makes `/plugin install` set up the
   connector alongside the skill.

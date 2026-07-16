@@ -26,73 +26,43 @@ Column names vary by source (Waalaxy export, Sales Nav export, third-party scrap
 not by exact header. Handle missing columns gracefully: if industry is absent, judge on title +
 company + location only, and say so in the summary.
 
-### 2. Map columns to the target axes
+### 2. Judge each row against the target
 
-The scorer maps columns by content, not by header name, and handles missing columns. Before running
-it, sanity-check that the CSV carries text for at least the trade signal (title, occupation, headline,
-or company). If industry and headcount columns are absent, the matrix judges on title, occupation, and
-location text alone, which is normal for LinkedIn scrapes.
+For each row, compare to the locked target:
 
-### 3. Score each row with the matrix
+- **Title match** — does the current title fit the target's job titles, allowing for synonyms and
+  seniority variants? "Growth Manager" fits a "Head of Growth" target; "Marketing Intern" does not.
+- **Industry match** — if industry is present and the target specifies industries, does it fit? If
+  absent, skip this check rather than dropping on missing data.
+- **Company size** — if the data carries headcount, check the band. If absent, skip.
+- **Location** — does it fall inside the target region at country / major-region level? Respect the
+  granularity rule.
+- **Exclusions** — drop if the row hits an exclusion title, industry, company size, or company type
+  from the target.
 
-Run `scripts/score_list.py`. It applies a fixed scoring matrix. The matrix never changes. Only the
-target values plug in. It works for any CSV and any target.
+### 3. Classify, do not delete
 
-```
-python scripts/score_list.py --csv <uploaded.csv> --target <target.json> --out <outdir>
-```
+Mark every row as one of:
 
-Build `target.json` from the locked target card:
+- **keep** — clearly fits inclusion, no exclusion hit.
+- **drop** — clearly fails inclusion or hits an exclusion. Record a one-line reason.
+- **review** — genuinely ambiguous (e.g. vague title like "Consultant", missing key fields). When a
+  row could plausibly fit, mark review, not drop.
 
-```json
-{
-  "name": "Solo tradespeople & micro-entrepreneurs",
-  "location": "France",
-  "job_titles": ["Owner", "Founder", "Craftsman", "Self-employed Tradesperson"],
-  "industry": ["Construction", "Plumbing", "Locksmithing", "Roofing", "Glazing"],
-  "company_size": "1-10",
-  "exclusions": ["intern", "assistant", "student"]
-}
-```
-
-Add native-language synonyms to `industry` when the CSV is not in English. A French BTP scrape needs
-"electricien", "plombier", "couvreur" in the industry list, or the trade axis reads zero. Do the same
-for `exclusions` (off-target trades, agency roles, marketing titles).
-
-**The matrix (fixed weights):**
-
-| Axis | Weight | Full points when | Partial | Zero |
-|------|--------|------------------|---------|------|
-| Industry / trade | 45 | direct industry-term hit in a dedicated industry/sector column | adjacent term | no hit (only when an industry column exists) |
-| Role / seniority | 30 | title in target set | decision-maker term (0.85) or employee term (0.2) | exclusion title forces 0 |
-| Location | 15 | location inside target region/country | — | outside target |
-| Exclusion penalty | 0 to -40 | — | — | each exclusion hit subtracts 20, capped at 40 |
-
-**Bands:** score >= 70 keep. 40 to 69 review. below 40 drop.
-
-The industry axis only ever scores against a genuine industry/sector column (detected by header:
-industry, secteur, sector, activite, domaine). Most LinkedIn scrapes don't have one — in that case
-the axis is always neutral (half points), never zero. The script cannot penalize a lead for data the
-CSV never collected; a missing industry column is not a mismatch.
-
-The matrix is conservative by design. A missing field never auto-drops. It lowers the axis to neutral
-so the row lands in review, not drop. A wrongly dropped lead is invisible to the user. A wrongly kept
-one only costs a connection request.
-
-The script writes `cleaned_list.csv`, `dropped.csv`, `review.csv`, `scored_full.csv`, and prints the
-summary. Do not hand-classify. Run the script, read its summary, present the files.
+Be conservative on drops. A wrongly dropped lead is invisible to the user; a wrongly kept one only
+costs them a connection request. When unsure, lean keep or review.
 
 ### 4. Output
 
-The scorer produces and you present:
+Produce and present:
 
-- `cleaned_list.csv` — kept rows, original columns preserved plus a `score` column, ready for Waalaxy import.
-- `dropped.csv` — dropped rows plus `score` and `drop_reason`.
-- `review.csv` — ambiguous rows plus `score` and reason, for the user to eyeball.
-- `scored_full.csv` — every row with all four axis scores, for auditing the matrix.
+- `cleaned_list.csv` — kept rows, original columns preserved, ready for Waalaxy import.
+- `dropped.csv` — dropped rows plus a `drop_reason` column.
+- `review.csv` — ambiguous rows, if any, for the user to eyeball.
+- A short summary in chat: total rows in, kept, dropped, in review, and the top 3 drop reasons.
 
-Present the files. Give the summary in chat: total in, kept, dropped, in review, top 3 drop reasons.
-Never return only a summary. Never silently delete. Every drop is visible and reversible.
+Save files to the outputs directory and present them. Never return only a summary; the user needs the
+actual files. Never silently delete; every drop must be visible and reversible.
 
 ---
 

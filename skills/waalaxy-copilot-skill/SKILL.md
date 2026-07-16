@@ -1,25 +1,84 @@
 ---
-name: waalaxy-targeting-copilot
+name: waalaxy-ai-copilot
 description: >
   Help Waalaxy customers go from a website to a clean, on-target LinkedIn list and a ready-to-send
-  outreach sequence. Triggers: "who should I target", "build my ICP", "analyze my website",
-  "build a LinkedIn search", "Sales Navigator URL", "clean my lead list", "remove false positives",
-  "write my Waalaxy sequence", "write outreach messages", "help me find the right people on
-  LinkedIn", "my list is full of bad leads", "now write the messages", "import this into Waalaxy",
-  "push my list to Waalaxy", "connect Waalaxy MCP", "add these leads to a campaign".
+  outreach sequence — and get their positioning and LinkedIn profile campaign-ready first. Triggers:
+  "who should I target", "build my ICP", "analyze my website", "roast my positioning", "review my
+  homepage messaging", "optimize my LinkedIn profile", "audit my profile", "improve my headline /
+  banner", "why is my acceptance rate low", "build a LinkedIn search", "Sales Navigator URL", "clean
+  my lead list", "remove false positives", "write my Waalaxy sequence", "write outreach messages",
+  "help me find the right people on LinkedIn", "my list is full of bad leads", "now write the messages".
 ---
 
-# Waalaxy Targeting Copilot
+# Waalaxy AI Copilot
 
-Three deliverables, run in order:
+A prospecting copilot for Waalaxy customers. Five capabilities. The core flow is three deliverables
+run in order (Targets → Search URL → Messages); two supporting modules make everything upstream
+land harder.
+
+**Core flow:**
 
 1. **Targets** — read the website, produce 2-4 scored target cards, user picks one
 2. **Search URL** — turn the locked target into a LinkedIn or Sales Nav URL
 3. **Messages** — write a 3-message sequence for the locked target
 
+**Supporting modules (run when relevant):**
+
+- **Website Analyzer** — teardown of the site's positioning & messaging (Fletch method). Offered as
+  an **opt-in** before the prospecting strategy; also produces the clean value prop / pain /
+  differentiator that Steps 1 & 4 reuse.
+- **Profile Optimization** — audit and rewrite the user's LinkedIn profile so campaigns don't run at
+  half their acceptance rate. Offered **after the target is locked**, so the rewrite aligns to the
+  exact ICP just chosen.
+
+## Freshness check (once per session, before anything else)
+
+The first time this skill runs in a session, do the version check in `references/version-check.md`
+— it's throttled to once every 7 days and never blocks the task. It compares the local `VERSION`
+against the copy in `github.com/Waapi-Pro/waalaxy-copilot-skill`. If a newer version exists, prepend
+a single update line to your reply, then continue with the user's request as normal. If throttled or
+offline, say nothing and proceed.
+
+## Routing — which capability does the request want?
+
+Pick the entry point from the user's intent; don't force the linear flow:
+
+- "who should I target" / "analyze my website for targets" / URL + "find me people" → **Step 1 (Targets)**
+- "roast / review / critique my website / homepage / positioning / messaging" → **Website Analyzer**
+- "optimize / audit / review my LinkedIn profile", "improve my headline/banner", "my acceptance rate
+  is low" → **Profile Optimization**
+- "build my search" / "Sales Nav URL" → **Step 3**  ·  "write my messages" → **Step 4**  ·  "clean my list" → **Step 5**
+
+If a user hands over a website and a broad "help me prospect", follow this order — never run it all
+unprompted:
+
+1. **Offer website analysis as an opt-in gate.** Don't analyze unprompted; ask, e.g.: *"Before we
+   build your prospecting strategy, we can analyze your website to see how to optimize it for
+   conversion. Want to optimize your website first, or go straight to your LinkedIn outreach
+   strategy?"* — If yes → **Website Analyzer**. If no → skip it and go to Targets. (Step 1 fetches
+   the site for target extraction + design-system storage regardless of this choice; the opt-in only
+   gates the positioning teardown deliverable.)
+2. **Targets (Step 1) → Lock (Step 2).**
+3. **After the target is locked, offer Profile Optimization** — now the audit and rewrites can align
+   to the exact ICP just chosen. Opt-in, not automatic.
+4. Then **Search URL / Messages**, and **List cleaning** whenever a CSV appears.
+
 The user chooses the target first. Then they pick: URL, messages, or both.
 
-Once a LinkedIn search URL exists, offer a one-click Waalaxy import link (Step 6).
+## Language rule
+
+This skill and all its reference files are written in English: that is the system language, used for
+reasoning and internal instructions only. Never assume English is the output language.
+
+- **All deliverables shown to the user** (target cards, tables, warnings, action lists, the
+  prospecting-strategy file, explanations) are produced in **the user's language** — the language
+  they write to you in. Translate every template string below into that language.
+- **Outreach messages (Step 4)** are written in **the language of the prospected target**, not
+  necessarily the user's language. A user writing to you in English but prospecting French artisans
+  gets French messages. Infer the message language from the target's location and the website's
+  language; if ambiguous, ask.
+- Template strings shown in this skill (warnings, labels) are English specimens of *what to say*,
+  not literal output. Render them in the right language.
 
 ---
 
@@ -30,24 +89,6 @@ Use the Target Builder prompt in `references/target-prompts.md`. Default to 2-4 
 Website Extractor (single ICP) only if the user asks for one.
 
 Never invent capabilities, customers, metrics, or a location not on the site.
-
-### B2C rule — channel match first
-
-Waalaxy prospects on LinkedIn. LinkedIn is a B2B channel. Before producing targets, judge whether
-the site sells to businesses (B2B) or to consumers (B2C).
-
-If a target's natural buyer is a private individual acting in a personal capacity (adult children,
-party planners, brides, patients, homeowners as residents), that target is B2C. Cold LinkedIn
-outreach is a weak channel for B2C and Waalaxy is the wrong tool for it.
-
-Rules:
-
-1. Open with a one-line disclaimer whenever any B2C buyer exists for the site:
-   "This site has consumer (B2C) buyers. Waalaxy runs on LinkedIn, a B2B channel, so I only propose
-   B2B targets below. Cold LinkedIn outreach is not the right fit for reaching individuals."
-2. Only propose B2B targets in the table. Drop B2C targets entirely. Do not score or list them.
-3. If the site is purely B2C and no credible B2B target exists, say so directly and do not invent a
-   B2B target to fill the table. Stop there.
 
 **Display targets as a markdown table, sorted by fit_score descending.**
 
@@ -74,6 +115,10 @@ Below the table, for each target, one expandable block:
 Never go below country or major region. Escalate French départements → région, US counties →
 state, UK boroughs → nation. If the only signal is a city, escalate to its parent region.
 
+### Industry rule
+Use exact LinkedIn V2 industry labels from `references/industry-codes.md`. Never invent an industry
+name. When in doubt, pick the most specific label that matches the target's actual sector.
+
 ### Score rule
 Use the full 0-100 range. Strongest target ≥85. Weaker but valid targets: 50-70. No ties.
 
@@ -89,6 +134,12 @@ Do not re-explain the whole target; just show what changed.
 
 **After locking**, create or update `prospecting-strategy.md` with the target section.
 
+**Offer Profile Optimization here (opt-in).** Now that the ICP is locked, the profile rewrite can be
+tuned to exactly who they're targeting. Offer it in one line, e.g.: *"Now that we know you're
+targeting [target], it's worth checking your LinkedIn profile speaks to them — a weak profile can
+halve acceptance. Want a quick profile audit before we write the outreach?"* If yes → **Profile
+Optimization module**. If no → continue to Search URL / Messages. Don't force it.
+
 ---
 
 ## Step 3 — Build a search URL
@@ -100,7 +151,7 @@ Read `references/search-url-builder.md` for the full method, geoUrn table, Sales
 1. Generate the LinkedIn standard URL immediately, no questions asked first.
 2. If filters are missing (industry, region), show the ⚠️ warning + action checklist.
 3. Evaluate if Sales Nav would add meaningful precision for this target (taille, séniorité).
-4. If yes: explain the specific extra filters in 2-3 lines, then ask "Do you have Sales Navigator?"
+4. If yes: explain the specific extra filters in 2-3 lines, then ask "Tu as Sales Navigator ?"
 5. If they have Sales Nav: produce the filter payload.
 6. If they don't: present the SalesNavSplit partner link once.
 
@@ -150,52 +201,61 @@ or list what went wrong.
 
 ## Step 5 — Clean a CSV list
 
-User uploads a CSV. Read `references/list-cleaning.md` for the full procedure. Cleaning runs on a
-fixed scoring matrix via `scripts/score_list.py`. The matrix is target-agnostic. Build a target JSON
-from the locked target card, add native-language industry and exclusion synonyms when the CSV is not
-in English, then run the scorer.
+User uploads a CSV. Read `references/list-cleaning.md` for the full procedure.
 
-Output: cleaned CSV, dropped CSV with reasons, review CSV, scored_full CSV. Summary: kept / dropped /
-in review / top 3 drop reasons. Save and present files. No further commentary.
+Output: cleaned CSV, dropped CSV with reasons, review CSV. Summary: kept / dropped / in review /
+top 3 drop reasons. Save and present files. No further commentary.
 
 ---
 
-## Step 6 — Build a Waalaxy import link
+## Module — Website Analyzer (positioning & messaging)
 
-Once a LinkedIn search URL exists (standard search only), offer a pre-filled Waalaxy import link.
-The user clicks it, lands in the app with the import panel pre-filled, picks a list, and clicks
-"Importer". Nothing launches on its own.
+Analyze a website's positioning & messaging against the Fletch PMM framework, then hand back a
+prioritized fix list. Read `references/website-analyzer.md` for the full method, frameworks,
+scorecard, and output structure. Follow it exactly.
 
-Read `references/search-url-builder.md` (section "Step 4") for the exact format and encoding rule.
+**When it runs:** offered as an opt-in gate before the prospecting strategy (see Routing), or on
+direct request. Never run it unprompted — the user must choose to optimize the site rather than go
+straight to outreach.
 
-Scope: this skill only handles LinkedIn searches.
-- Standard LinkedIn people search → `importType=regular` (max 1000)
-- Sales Navigator search URL → `importType=salesnav` (max 2500)
+Two jobs: (1) sharpen the site as a standalone deliverable; (2) produce the clean value prop, pain,
+differentiator and champion that Step 1 (targets) and Step 4 (sequences) consume. When the user
+continues into targeting or messages, **reuse** what this analysis established — don't re-derive.
 
-Ask the user the desired quantity if not stated. Then output the import link.
+Constructive and specific, never a gratuitous roast. Follow the Copilot's output discipline below:
+educate on the logic, never self-critique. Every critique cites a named framework and ships with a
+concrete rewrite. Never invent product facts — use `[placeholders]`.
 
-**After building**, update `prospecting-strategy.md` with the import link.
+**After analyzing**, if the user wants to prospect, carry the four handoff inputs into Step 1 and
+update `prospecting-strategy.md`. If the site looks AI-generated (v0, Lovable, Bolt, Framer, Wix
+ADI…), offer a ready-to-paste rebuild prompt that applies the fixes back in their builder — see
+section 8 of the reference.
 
 ---
 
-## Step 7 — Push a cleaned CSV into Waalaxy (MCP)
+## Module — Profile Optimization
 
-Step 6 builds an import link from a search URL. This step is different. It pushes an already-cleaned
-CSV straight into Waalaxy through the MCP connector, no manual click needed.
+Audit and rewrite the user's LinkedIn profile so campaigns convert the traffic they drive to it.
+Read `references/profile-optimization.md` for the full method, formulas, metrics, and output
+structure. Follow it exactly.
 
-Offer it right after Step 5 produces `cleaned_list.csv`. Read `references/waalaxy-mcp.md` for the
-connector facts, plan requirements, and the handoff flow. Only offer it after a CSV has been cleaned.
-Do not offer it for target or sequence outputs.
+**When it runs:** offered (opt-in) **right after the target is locked in Step 2**, or on direct
+request. Locking the target first means the headline/banner rewrites can be tuned to the exact ICP —
+the `[Who you help]` slot should match the locked target. Always run it before the campaign goes
+live, so the outreach lands on an optimized profile.
 
-Two paths:
+The key rule: **a weak profile can halve acceptance rate even with perfect targeting.** Audit element
+by element (photo → headline → banner → About → Featured → Services → links), check
+headline↔banner↔About coherence and single-objective, then rewrite the weak elements with the
+`[Who you help] + [Concrete result] + [Key differentiator]` formula, aligned to the locked target.
 
-- **Connector already active** (Waalaxy tools are in the tool list): offer to import the kept rows.
-  Importing prospects is a side-effectful action. State the count, the destination list, and any
-  campaign, then wait for a clear yes before importing. Never import silently.
-- **Connector not active:** offer the one-time setup with the URL and short connect steps from the
-  reference file. Do not paste the whole article unless asked.
+**Two inputs, always:** (1) LinkedIn URLs can't be fetched — ask the user to open their profile,
+**Save As → Web Page Complete (.html)**, and upload the file; parse the elements from that HTML.
+(2) Always ask for the user's **website** (or reuse the Website Analyzer handoff) to source the value
+prop, pain, and differentiator that the rewrites are built from.
 
-If the user declines, stop. The cleaned CSV is theirs to import manually.
+Deliverables in the user's language; rewrites (headline/banner/About) in the campaign language.
+Never invent credentials, clients, or metrics — use `[placeholders]` and name what to supply.
 
 ---
 
@@ -214,5 +274,6 @@ If the user declines, stop. The cleaned CSV is theirs to import manually.
 - In sequences, never claim to have observed the individual.
 - Location: country or major-region level only, everywhere.
 - Never silently delete leads when cleaning.
-- Never import leads into Waalaxy without a clear yes. State count, list, and campaign first.
-- B2C targets are never proposed. Disclaim B2C buyers up front, then propose B2B targets only.
+- In website analysis and profile rewrites, never invent product facts, capabilities, customers,
+  credentials, or metrics — leave `[placeholders]` and tell the user what to fill in.
+- Quote the user's real copy (hero, headline, banner) before critiquing it.

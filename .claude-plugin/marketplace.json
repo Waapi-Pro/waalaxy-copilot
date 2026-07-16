@@ -4,12 +4,12 @@
     "name": "Waalaxy / Waapi",
     "url": "https://github.com/Waapi-Pro"
   },
-  "description": "The Waalaxy Targeting Copilot for Claude: website-to-targets, LinkedIn/Sales Nav search URLs, outreach sequences, and CSV list cleaning, with the Waalaxy MCP connector bundled for one-step install.",
+  "description": "The Waalaxy AI Copilot for Claude: website positioning teardown, website-to-targets, LinkedIn/Sales Nav search URLs, LinkedIn profile optimization, outreach sequences, and CSV list cleaning, with the Waalaxy MCP connector bundled for one-step install.",
   "plugins": [
     {
       "name": "waalaxy-copilot",
       "source": "./",
-      "description": "Skill + Waalaxy MCP connector bundle. Installing this plugin sets up the full targeting workflow (targets -> search URL -> sequence -> list cleaning -> Waalaxy import) and connects the Waalaxy account via MCP in one step.",
+      "description": "Skill + Waalaxy MCP connector bundle. Installing this plugin sets up the full prospecting workflow (website teardown -> targets -> search URL -> profile optimization -> sequence -> list cleaning -> Waalaxy import) and connects the Waalaxy account via MCP in one step.",
       "author": {
         "name": "Waalaxy / Waapi",
         "url": "https://github.com/Waapi-Pro"
